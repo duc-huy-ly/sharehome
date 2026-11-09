@@ -55,6 +55,42 @@ ShareHome is a cross-platform sharehouse application for group communication, ch
 - Input validation MUST occur at application boundaries and be backed by database constraints where appropriate.
 - Authentication and authorization failures MUST be reported explicitly and MUST NOT result in success-shaped responses.
 
+## Deployment requirements
+
+### Production container
+
+- The Next.js application MUST be packaged as a portable production Docker image.
+- The Docker image MUST use a multi-stage build so build-time dependencies and source files are not included unnecessarily in the runtime image.
+- The production image MUST run the Next.js Node server using standalone output.
+- The final image SHOULD use a minimal supported Node.js runtime image.
+- The application MUST run as a non-root user inside the container.
+- The image MUST NOT contain credentials, private keys, or environment-specific secrets.
+- Runtime configuration MUST be supplied through environment variables or the deployment platform's secret-management facility.
+- The container MUST expose only the application port required by the hosting platform.
+
+### Runtime operations
+
+- The application MUST provide a health-check endpoint suitable for container liveness and readiness checks.
+- The application MUST handle termination signals and allow in-flight requests to complete where practical.
+- Application logs MUST be written to standard output/error so the hosting platform can collect them.
+- Logs MUST NOT contain passwords, authentication tokens, service-role keys, or other sensitive values.
+- Resource requests, limits, and restart behavior SHOULD be configurable by the deployment platform rather than hard-coded into the image.
+
+### Local development
+
+- The repository SHOULD provide a Docker Compose workflow for running the Next.js application locally.
+- The initial local workflow SHOULD connect to a dedicated hosted Supabase development project rather than starting a local Supabase stack.
+- Development, testing, and production Supabase projects MUST remain separate.
+- Local environment files MUST be excluded from version control and documented through a safe example configuration.
+
+### Hosting boundary
+
+- The production container MUST remain portable across managed container platforms.
+- The initial deployment SHOULD use a managed container host rather than Kubernetes.
+- Supabase services MUST remain externally managed for the initial release.
+- PostgreSQL, Supabase Auth, Supabase Realtime, and Supabase Storage MUST NOT be bundled into the application container.
+- Self-hosting the Supabase stack MAY be evaluated later if operational, compliance, or cost requirements justify the additional complexity.
+
 ## Responsive web scope
 
 The initial release focuses on a responsive web experience:
@@ -81,7 +117,6 @@ The initial release focuses on a responsive web experience:
 
 The following decisions remain open and must be resolved before production deployment or implementation of the affected features:
 
-- Hosting and deployment platform
 - Environment and secret management conventions
 - Supported currency and locale
 - Timezone handling and display rules
